@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我在末世捡垃圾 - 预览版</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'ZCOOL KuaiLe', cursive; background: #1a1a1a; color: white; overflow: hidden; }
+        .fade-in { animation: fadeIn 0.8s ease-in forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .bg-cover-custom {
+            background-image: url('https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&q=80&w=1000'); /* 替换为你生成的封面图 */
+            background-size: cover; background-position: center;
+        }
+        .mii-box { border: 3px solid #f3f4f6; transition: all 0.2s; }
+        .mii-box:hover { transform: scale(1.05); border-color: #fbbf24; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState } = React;
+
+        function App() {
+            const [step, setStep] = useState('cover'); // cover, menu, create, customize
+            const [charInfo, setCharInfo] = useState({ name: '', gender: '待确定' });
+            const [selections, setSelections] = useState({
+                hair: 1, face: 1, eyes: 1, mouth: 1, body: 2
+            });
+
+            // 选项库定义
+            const options = {
+                hair: ["清爽短发", "斜刘海", "凌乱炸毛", "小马尾", "中分长发", "束发带", "遮眼发", "双马尾", "自然卷", "波波头"],
+                eyes: ["坚定大眼", "死鱼眼", "弯弯眼", "睫毛眼", "小豆眼", "无辜眼", "狐狸眼", "眼镜眼", "圆圆眼", "犀利眼"],
+                mouth: ["微笑", "大笑", "一字嘴", "猫咪嘴", "嘟嘟嘴", "满足嘴", "O型嘴", "咬草嘴", "胡渣嘴", "抿嘴笑"]
+            };
+
+            // 界面 1: 封面
+            if (step === 'cover') {
+                return (
+                    <div className="h-screen w-screen bg-cover-custom flex flex-col items-center justify-center cursor-pointer" onClick={() => setStep('menu')}>
+                        <h1 className="text-7xl font-bold mb-8 text-yellow-500 drop-shadow-2xl">我在末世捡垃圾</h1>
+                        <p className="text-2xl animate-bounce text-white/80 text-shadow">点击屏幕开始</p>
+                    </div>
+                );
+            }
+
+            // 界面 2: 菜单
+            if (step === 'menu') {
+                return (
+                    <div className="h-screen w-screen bg-black/60 flex flex-col items-center justify-center space-y-6 fade-in">
+                        <h1 className="text-5xl font-bold mb-10 text-yellow-500">我在末世捡垃圾</h1>
+                        <button onClick={() => setStep('create')} className="w-64 py-4 bg-yellow-600 hover:bg-yellow-500 rounded-full text-2xl transition shadow-lg">开始新游戏</button>
+                        <button className="w-64 py-4 bg-white/10 hover:bg-white/20 rounded-full text-2xl border border-white/30 transition">找找旧存档</button>
+                        <button className="w-64 py-4 bg-white/10 hover:bg-white/20 rounded-full text-2xl border border-white/30 transition">设置</button>
+                    </div>
+                );
+            }
+
+            // 界面 3: 基础档案
+            if (step === 'create') {
+                return (
+                    <div className="h-screen w-screen flex items-center justify-center p-4 fade-in">
+                        <div className="bg-orange-50 p-8 rounded-lg shadow-2xl text-gray-800 max-w-md w-full border-t-8 border-yellow-600">
+                            <h2 className="text-3xl font-bold mb-6 text-center border-b-2 border-gray-300 pb-2">幸存者登记表</h2>
+                            <div className="space-y-6">
+                                <div>
+                                    <label className="block text-xl mb-2">姓名:</label>
+                                    <input type="text" className="w-full border-2 border-gray-400 p-2 rounded" placeholder="输入你的名字..." 
+                                           onChange={(e) => setCharInfo({...charInfo, name: e.target.value})} />
+                                </div>
+                                <div>
+                                    <label className="block text-xl mb-2">性别:</label>
+                                    <div className="flex space-x-2">
+                                        {['男', '女', '待确定'].map(g => (
+                                            <button key={g} onClick={() => setCharInfo({...charInfo, gender: g})}
+                                                    className={`flex-1 py-2 rounded border-2 transition ${charInfo.gender === g ? 'bg-yellow-600 border-yellow-700 text-white' : 'bg-white border-gray-300'}`}>
+                                                {g}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                                <button onClick={() => setStep('customize')} className="w-full py-4 bg-green-600 hover:bg-green-500 text-white rounded text-2xl font-bold transition">
+                                    进入捏人环节
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                );
+            }
+
+            // 界面 4: 捏人 (简易版)
+            if (step === 'customize') {
+                return (
+                    <div className="h-screen w-screen flex flex-col md:flex-row bg-[#2c3e50] fade-in">
+                        {/* 左侧角色预览 */}
+                        <div className="flex-1 flex items-center justify-center bg-white/5 relative">
+                            <div className="text-center">
+                                <div className="w-64 h-80 bg-gray-200 rounded-full relative flex flex-col items-center justify-center border-4 border-white shadow-inner">
+                                    {/* 模拟 Mii 表情 */}
+                                    <div className="text-4xl absolute top-10">💇 {options.hair[selections.hair-1]}</div>
+                                    <div className="text-5xl mt-10">👀 {options.eyes[selections.eyes-1]}</div>
+                                    <div className="text-4xl mt-4">👄 {options.mouth[selections.mouth-1]}</div>
+                                </div>
+                                <p className="mt-4 text-2xl text-yellow-400 font-bold">{charInfo.name || '拾荒者'} ({charInfo.gender})</p>
+                            </div>
+                        </div>
+
+                        {/* 右侧选项 */}
+                        <div className="w-full md:w-96 bg-gray-100 p-6 overflow-y-auto text-gray-800">
+                            <h3 className="text-2xl font-bold mb-4 border-b pb-2">外观定制</h3>
+                            
+                            <div className="space-y-6">
+                                {Object.entries(options).map(([key, list]) => (
+                                    <div key={key}>
+                                        <p className="capitalize font-bold mb-2 text-gray-500">{key === 'hair' ? '发型' : key === 'eyes' ? '眼睛' : '嘴巴'}</p>
+                                        <div className="grid grid-cols-2 gap-2">
+                                            {list.map((item, idx) => (
+                                                <button key={idx} onClick={() => setSelections({...selections, [key]: idx + 1})}
+                                                        className={`p-2 text-sm rounded mii-box bg-white ${selections[key] === idx + 1 ? 'ring-2 ring-yellow-500 bg-yellow-50' : ''}`}>
+                                                    {item}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+
+                            <button onClick={() => alert('捡垃圾系统开发中...')} className="w-full mt-10 py-4 bg-yellow-600 text-white rounded-xl text-xl font-bold shadow-lg hover:bg-yellow-500">
+                                就这样，出发捡垃圾！
+                            </button>
+                        </div>
+                    </div>
+                );
+            }
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
