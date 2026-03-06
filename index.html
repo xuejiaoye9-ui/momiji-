@@ -14,7 +14,7 @@
         .fade-in { animation: fadeIn 0.8s ease-in forwards; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .bg-cover-custom {
-            background-image: url('https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&q=80&w=1000'); /* 替换为你生成的封面图 */
+            background-image: url('cover.jpg'); /* 替换为你生成的封面图 */
             background-size: cover; background-position: center;
         }
         .mii-box { border: 3px solid #f3f4f6; transition: all 0.2s; }
@@ -45,7 +45,6 @@
             if (step === 'cover') {
                 return (
                     <div className="h-screen w-screen bg-cover-custom flex flex-col items-center justify-center cursor-pointer" onClick={() => setStep('menu')}>
-                        <h1 className="text-7xl font-bold mb-8 text-yellow-500 drop-shadow-2xl">我在末世捡垃圾</h1>
                         <p className="text-2xl animate-bounce text-white/80 text-shadow">点击屏幕开始</p>
                     </div>
                 );
