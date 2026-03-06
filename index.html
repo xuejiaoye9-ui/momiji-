@@ -11,14 +11,15 @@
     <link href="https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'ZCOOL KuaiLe', cursive; background: #1a1a1a; color: white; overflow: hidden; }
-        .fade-in { animation: fadeIn 0.8s ease-in forwards; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .fade-in { animation: fadeIn 0.6s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
         .bg-cover-custom {
-            background-image: url('cover.jpg'); /* 替换为你生成的封面图 */
+            background-image: url('cover.jpg'); 
             background-size: cover; background-position: center;
         }
-        .mii-box { border: 3px solid #f3f4f6; transition: all 0.2s; }
-        .mii-box:hover { transform: scale(1.05); border-color: #fbbf24; }
+        .char-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; }
+        .char-card:hover { transform: translateY(-10px); filter: brightness(1.1); }
+        .selected-ring { border: 6px solid #fbbf24; box-shadow: 0 0 20px rgba(251, 191, 36, 0.5); }
     </style>
 </head>
 <body>
@@ -28,24 +29,16 @@
         const { useState } = React;
 
         function App() {
-            const [step, setStep] = useState('cover'); // cover, menu, create, customize
-            const [charInfo, setCharInfo] = useState({ name: '', gender: '待确定' });
-            const [selections, setSelections] = useState({
-                hair: 1, face: 1, eyes: 1, mouth: 1, body: 2
-            });
-
-            // 选项库定义
-            const options = {
-                hair: ["清爽短发", "斜刘海", "凌乱炸毛", "小马尾", "中分长发", "束发带", "遮眼发", "双马尾", "自然卷", "波波头"],
-                eyes: ["坚定大眼", "死鱼眼", "弯弯眼", "睫毛眼", "小豆眼", "无辜眼", "狐狸眼", "眼镜眼", "圆圆眼", "犀利眼"],
-                mouth: ["微笑", "大笑", "一字嘴", "猫咪嘴", "嘟嘟嘴", "满足嘴", "O型嘴", "咬草嘴", "胡渣嘴", "抿嘴笑"]
-            };
+            const [step, setStep] = useState('cover'); // cover, menu, create
+            const [charInfo, setCharInfo] = useState({ name: '', gender: '待确定', styleId: null });
 
             // 界面 1: 封面
             if (step === 'cover') {
                 return (
-                    <div className="h-screen w-screen bg-cover-custom flex flex-col items-center justify-center cursor-pointer" onClick={() => setStep('menu')}>
-                        <p className="text-2xl animate-bounce text-white/80 text-shadow">点击屏幕开始</p>
+                    <div className="h-screen w-screen bg-cover-custom flex flex-col items-center justify-end pb-24 cursor-pointer" onClick={() => setStep('menu')}>
+                        <p className="text-2xl animate-bounce text-white/90 bg-black/40 px-8 py-3 rounded-full backdrop-blur-md border border-white/20">
+                            点击屏幕开始
+                        </p>
                     </div>
                 );
             }
@@ -53,86 +46,80 @@
             // 界面 2: 菜单
             if (step === 'menu') {
                 return (
-                    <div className="h-screen w-screen bg-black/60 flex flex-col items-center justify-center space-y-6 fade-in">
-                        <h1 className="text-5xl font-bold mb-10 text-yellow-500">我在末世捡垃圾</h1>
-                        <button onClick={() => setStep('create')} className="w-64 py-4 bg-yellow-600 hover:bg-yellow-500 rounded-full text-2xl transition shadow-lg">开始新游戏</button>
-                        <button className="w-64 py-4 bg-white/10 hover:bg-white/20 rounded-full text-2xl border border-white/30 transition">找找旧存档</button>
-                        <button className="w-64 py-4 bg-white/10 hover:bg-white/20 rounded-full text-2xl border border-white/30 transition">设置</button>
+                    <div className="h-screen w-screen bg-black/70 flex flex-col items-center justify-center space-y-6 fade-in">
+                        <h1 className="text-6xl font-bold mb-12 text-yellow-500 tracking-widest">主菜单</h1>
+                        <button onClick={() => setStep('create')} className="w-72 py-4 bg-yellow-600 hover:bg-yellow-500 rounded-full text-2xl transition-all shadow-xl hover:scale-105">开始新生活</button>
+                        <button className="w-72 py-4 bg-white/10 hover:bg-white/20 rounded-full text-2xl border border-white/20 transition opacity-50 cursor-not-allowed">旧日记忆 (暂未开放)</button>
                     </div>
                 );
             }
 
-            // 界面 3: 基础档案
+            // 界面 3: 角色创建 (档案 + 形象选择)
             if (step === 'create') {
                 return (
-                    <div className="h-screen w-screen flex items-center justify-center p-4 fade-in">
-                        <div className="bg-orange-50 p-8 rounded-lg shadow-2xl text-gray-800 max-w-md w-full border-t-8 border-yellow-600">
-                            <h2 className="text-3xl font-bold mb-6 text-center border-b-2 border-gray-300 pb-2">幸存者登记表</h2>
-                            <div className="space-y-6">
-                                <div>
-                                    <label className="block text-xl mb-2">姓名:</label>
-                                    <input type="text" className="w-full border-2 border-gray-400 p-2 rounded" placeholder="输入你的名字..." 
-                                           onChange={(e) => setCharInfo({...charInfo, name: e.target.value})} />
-                                </div>
-                                <div>
-                                    <label className="block text-xl mb-2">性别:</label>
-                                    <div className="flex space-x-2">
-                                        {['男', '女', '待确定'].map(g => (
-                                            <button key={g} onClick={() => setCharInfo({...charInfo, gender: g})}
-                                                    className={`flex-1 py-2 rounded border-2 transition ${charInfo.gender === g ? 'bg-yellow-600 border-yellow-700 text-white' : 'bg-white border-gray-300'}`}>
-                                                {g}
-                                            </button>
-                                        ))}
-                                    </div>
-                                </div>
-                                <button onClick={() => setStep('customize')} className="w-full py-4 bg-green-600 hover:bg-green-500 text-white rounded text-2xl font-bold transition">
-                                    进入捏人环节
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                );
-            }
-
-            // 界面 4: 捏人 (简易版)
-            if (step === 'customize') {
-                return (
-                    <div className="h-screen w-screen flex flex-col md:flex-row bg-[#2c3e50] fade-in">
-                        {/* 左侧角色预览 */}
-                        <div className="flex-1 flex items-center justify-center bg-white/5 relative">
-                            <div className="text-center">
-                                <div className="w-64 h-80 bg-gray-200 rounded-full relative flex flex-col items-center justify-center border-4 border-white shadow-inner">
-                                    {/* 模拟 Mii 表情 */}
-                                    <div className="text-4xl absolute top-10">💇 {options.hair[selections.hair-1]}</div>
-                                    <div className="text-5xl mt-10">👀 {options.eyes[selections.eyes-1]}</div>
-                                    <div className="text-4xl mt-4">👄 {options.mouth[selections.mouth-1]}</div>
-                                </div>
-                                <p className="mt-4 text-2xl text-yellow-400 font-bold">{charInfo.name || '拾荒者'} ({charInfo.gender})</p>
-                            </div>
-                        </div>
-
-                        {/* 右侧选项 */}
-                        <div className="w-full md:w-96 bg-gray-100 p-6 overflow-y-auto text-gray-800">
-                            <h3 className="text-2xl font-bold mb-4 border-b pb-2">外观定制</h3>
+                    <div className="h-screen w-screen flex items-center justify-center p-6 fade-in bg-[#2c3e50]/80">
+                        <div className="bg-[#fdf6e3] p-10 rounded-[2rem] shadow-2xl text-gray-800 max-w-6xl w-full border-b-8 border-yellow-700">
+                            <h2 className="text-4xl font-bold mb-8 text-center border-b-4 border-gray-200 pb-4 text-yellow-800">幸存者登记表</h2>
                             
-                            <div className="space-y-6">
-                                {Object.entries(options).map(([key, list]) => (
-                                    <div key={key}>
-                                        <p className="capitalize font-bold mb-2 text-gray-500">{key === 'hair' ? '发型' : key === 'eyes' ? '眼睛' : '嘴巴'}</p>
-                                        <div className="grid grid-cols-2 gap-2">
-                                            {list.map((item, idx) => (
-                                                <button key={idx} onClick={() => setSelections({...selections, [key]: idx + 1})}
-                                                        className={`p-2 text-sm rounded mii-box bg-white ${selections[key] === idx + 1 ? 'ring-2 ring-yellow-500 bg-yellow-50' : ''}`}>
-                                                    {item}
+                            <div className="flex flex-col lg:flex-row gap-12">
+                                {/* 左侧：基本资料 */}
+                                <div className="lg:w-1/3 space-y-8">
+                                    <div className="bg-white/50 p-6 rounded-2xl shadow-inner">
+                                        <label className="block text-2xl mb-3 font-bold text-gray-700">1. 你的称呼:</label>
+                                        <input type="text" className="w-full border-b-4 border-gray-300 bg-transparent p-2 text-2xl outline-none focus:border-yellow-500 transition-colors" 
+                                               placeholder="输入名字..." value={charInfo.name}
+                                               onChange={(e) => setCharInfo({...charInfo, name: e.target.value})} />
+                                    </div>
+
+                                    <div className="bg-white/50 p-6 rounded-2xl shadow-inner">
+                                        <label className="block text-2xl mb-3 font-bold text-gray-700">2. 生理特征:</label>
+                                        <div className="flex gap-3">
+                                            {['男', '女', '待确定'].map(g => (
+                                                <button key={g} onClick={() => setCharInfo({...charInfo, gender: g, styleId: null})}
+                                                        className={`flex-1 py-3 rounded-xl border-2 text-xl font-bold transition-all ${charInfo.gender === g ? 'bg-yellow-600 border-yellow-700 text-white' : 'bg-white border-gray-300 text-gray-500'}`}>
+                                                    {g}
                                                 </button>
                                             ))}
                                         </div>
                                     </div>
-                                ))}
+                                </div>
+
+                                {/* 右侧：形象选择 (仅在性别选为女时显示) */}
+                                <div className="lg:w-2/3">
+                                    {charInfo.gender === '女' ? (
+                                        <div className="fade-in space-y-6">
+                                            <label className="block text-2xl mb-3 font-bold text-yellow-800 text-center lg:text-left">3. 选择你在末世的模样:</label>
+                                            <div className="grid grid-cols-3 gap-6">
+                                                {[1, 2, 3].map(id => (
+                                                    <div key={id} onClick={() => setCharInfo({...charInfo, styleId: id})}
+                                                         className={`char-card relative rounded-3xl overflow-hidden aspect-[4/5] bg-white border-4 ${charInfo.styleId === id ? 'selected-ring scale-105' : 'border-gray-100 hover:border-yellow-200 shadow-lg'}`}>
+                                                        <img src={`assets/female_style_${id}.png`} 
+                                                             className="w-full h-full object-contain p-2" 
+                                                             alt={`形象 ${id}`} 
+                                                             onError={(e) => e.target.src='https://via.placeholder.com/300x400?text=Image+Missing'} />
+                                                        {charInfo.styleId === id && (
+                                                            <div className="absolute inset-0 bg-yellow-500/20 flex items-center justify-center pointer-events-none">
+                                                                <div className="bg-yellow-600 text-white p-2 rounded-full shadow-lg">
+                                                                    <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7"></path></svg>
+                                                                </div>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <div className="h-full flex items-center justify-center text-gray-400 text-2xl border-4 border-dashed border-gray-200 rounded-3xl p-12 text-center bg-gray-50/50">
+                                            {charInfo.gender === '男' ? "男性角色形象素材正在运输中...\n(目前请先尝试选择女性体验)" : "请先选择性别以激活外貌档案"}
+                                        </div>
+                                    )}
+                                </div>
                             </div>
 
-                            <button onClick={() => alert('捡垃圾系统开发中...')} className="w-full mt-10 py-4 bg-yellow-600 text-white rounded-xl text-xl font-bold shadow-lg hover:bg-yellow-500">
-                                就这样，出发捡垃圾！
+                            <button onClick={() => alert(`欢迎, ${charInfo.name}! 角色创建成功。\n即将进入你的末世小屋...`)} 
+                                    disabled={!charInfo.name || charInfo.gender !== '女' || !charInfo.styleId} 
+                                    className={`w-full mt-12 py-5 rounded-full text-3xl font-bold shadow-2xl transition-all active:scale-95 ${(!charInfo.name || charInfo.gender !== '女' || !charInfo.styleId) ? 'bg-gray-400 cursor-not-allowed opacity-50' : 'bg-green-600 hover:bg-green-500 text-white'}`}>
+                                签发这张身份证，出发！
                             </button>
                         </div>
                     </div>
